@@ -26,14 +26,25 @@ body {
 }
 
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Smooth horizontal scrolling */
+.tabs-container {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* Hide scrollbar but keep functionality */
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
 
-
-
+/* Mobile optimization */
+@media (max-width: 640px) {
+  .tabs-container {
+    scroll-padding: 0 16px;
+  }
+}

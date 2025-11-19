@@ -9,44 +9,43 @@ export default function Notepad() {
   const [activeTab, setActiveTab] = useState(null);
   const [selectedImg, setSelectedImg] = useState(null);
 
-  // -------------------------------
   // Load tabs from localStorage
-  // -------------------------------
   useEffect(() => {
     const savedTabs = JSON.parse(localStorage.getItem("notepad-tabs"));
     if (savedTabs && savedTabs.length > 0) {
       setTabs(savedTabs);
       setActiveTab(savedTabs[0].id);
     } else {
-      createNewTab(); // First tab
+      createNewTab();
     }
   }, []);
 
-  // --------------------------------
-  // Save tabs to localStorage
-  // --------------------------------
   const saveTabs = (updatedTabs) => {
     setTabs(updatedTabs);
     localStorage.setItem("notepad-tabs", JSON.stringify(updatedTabs));
   };
 
-  // --------------------------------
-  // Create a new tab
-  // --------------------------------
   const createNewTab = () => {
     const id = Date.now();
-    const newTab = { id, title: `Tab ${tabs.length + 1}`, content: "" };
+    const newTab = {
+      id,
+      title: `Note ${tabs.length + 1}`,
+      content: "",
+      createdAt: new Date().toISOString(),
+    };
 
     const updated = [...tabs, newTab];
     saveTabs(updated);
     setActiveTab(id);
 
-    if (editorRef.current) editorRef.current.innerHTML = "";
+    if (editorRef.current) {
+      setTimeout(() => {
+        editorRef.current.innerHTML = "";
+        editorRef.current.focus();
+      }, 100);
+    }
   };
 
-  // --------------------------------
-  // Switch tab
-  // --------------------------------
   const switchTab = (id) => {
     const tab = tabs.find((t) => t.id === id);
     setActiveTab(id);
@@ -58,9 +57,6 @@ export default function Notepad() {
     hideResizeHandles();
   };
 
-  // --------------------------------
-  // Rename tab
-  // --------------------------------
   const renameTab = (id, newTitle) => {
     const updated = tabs.map((t) =>
       t.id === id ? { ...t, title: newTitle } : t
@@ -68,9 +64,6 @@ export default function Notepad() {
     saveTabs(updated);
   };
 
-  // --------------------------------
-  // Delete tab
-  // --------------------------------
   const deleteTab = (id) => {
     let updated = tabs.filter((t) => t.id !== id);
 
@@ -84,9 +77,6 @@ export default function Notepad() {
     editorRef.current.innerHTML = updated[0].content;
   };
 
-  // --------------------------------
-  // Save content into active tab
-  // --------------------------------
   const saveContent = () => {
     if (!activeTab || !editorRef.current) return;
 
@@ -97,10 +87,7 @@ export default function Notepad() {
     saveTabs(updated);
   };
 
-  // ============================================================
-  // IMAGE INSERT, PASTE, SELECT, RESIZE (same as earlier)
-  // ============================================================
-
+  // Image handling functions (same as before)
   const insertHtmlAtCursor = (html) => {
     editorRef.current.focus();
     const sel = document.getSelection();
@@ -145,7 +132,7 @@ export default function Notepad() {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-          const imgHtml = `<img src="${e.target.result}" class="my-3 rounded-md shadow max-w-full" />`;
+          const imgHtml = `<img src="${e.target.result}" class="my-4 rounded-lg shadow-lg max-w-full border border-white/10" />`;
           insertHtmlAtCursor(imgHtml);
         };
 
@@ -177,30 +164,35 @@ export default function Notepad() {
   };
 
   const hideResizeHandles = () => {
-    handlesRef.current.style.display = "none";
+    if (handlesRef.current) {
+      handlesRef.current.style.display = "none";
+    }
     setSelectedImg(null);
   };
 
+  // Resize handles setup
   useEffect(() => {
     const box = document.createElement("div");
 
-    box.style.position = "absolute";
-    box.style.border = "2px solid #4f7fff";
+    box.style.position = "fixed";
+    box.style.border = "2px solid #10b981";
     box.style.pointerEvents = "none";
     box.style.display = "none";
     box.style.zIndex = "9999";
+    box.style.borderRadius = "8px";
 
     ["nw", "ne", "sw", "se"].forEach((pos) => {
       const h = document.createElement("div");
       h.dataset.pos = pos;
 
-      h.style.width = "12px";
-      h.style.height = "12px";
-      h.style.background = "white";
-      h.style.border = "2px solid #4f7fff";
+      h.style.width = "14px";
+      h.style.height = "14px";
+      h.style.background = "#10b981";
+      h.style.border = "2px solid #059669";
       h.style.borderRadius = "50%";
       h.style.position = "absolute";
       h.style.pointerEvents = "auto";
+      h.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
 
       h.style.cursor =
         pos === "nw"
@@ -232,17 +224,17 @@ export default function Notepad() {
     box.style.width = rect.width + "px";
     box.style.height = rect.height + "px";
 
-    handles[0].style.left = "-6px";
-    handles[0].style.top = "-6px";
+    handles[0].style.left = "-7px";
+    handles[0].style.top = "-7px";
 
-    handles[1].style.right = "-6px";
-    handles[1].style.top = "-6px";
+    handles[1].style.right = "-7px";
+    handles[1].style.top = "-7px";
 
-    handles[2].style.left = "-6px";
-    handles[2].style.bottom = "-6px";
+    handles[2].style.left = "-7px";
+    handles[2].style.bottom = "-7px";
 
-    handles[3].style.right = "-6px";
-    handles[3].style.bottom = "-6px";
+    handles[3].style.right = "-7px";
+    handles[3].style.bottom = "-7px";
   });
 
   useEffect(() => {
@@ -297,66 +289,138 @@ export default function Notepad() {
     return () => box.removeEventListener("mousedown", mouseDown);
   }, [selectedImg]);
 
-  // ============================================================
-  // UI
-  // ============================================================
+  const getWordCount = () => {
+    if (!editorRef.current) return 0;
+    const text = editorRef.current.innerText || "";
+    return text.trim() ? text.trim().split(/\s+/).length : 0;
+  };
+
+  const getLineCount = () => {
+    if (!editorRef.current) return 0;
+    const text = editorRef.current.innerText || "";
+    return text.trim() ? text.split("\n").length : 0;
+  };
 
   return (
-    <div className="h-full bg-[#1e1f22] text-gray-200">
-      {/* --------------------- TABS BAR ---------------------- */}
-      <div className="flex items-center w-full overflow-x-auto no-scrollbar gap-2">
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            onClick={() => switchTab(tab.id)}
-            onDoubleClick={() => {
-              const newTitle = prompt("Rename tab:", tab.title);
-              if (newTitle) renameTab(tab.id, newTitle);
-            }}
-            className={`
-        group flex items-center px-4 py-2 rounded-t-md border transition-all
-        whitespace-nowrap select-none
-        ${
-          activeTab === tab.id
-            ? " border-green-500 bg-green-600 text-white shadow-sm"
-            : "bg-[#3a3c42] border-gray-600 text-gray-300 hover:bg-[#323338]"
-        }
-      `}
-          >
-            <span className="truncate max-w-[120px]">{tab.title}</span>
+    <div className="h-screen bg-gradient-to-br from-gray-900 via-[#0f0f10] to-black text-gray-200 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gray-900/80 backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-pulse"></div>
+          <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            Notepad
+          </h1>
+          <div className="h-4 w-px bg-white/20 mx-2"></div>
+          <span className="text-sm text-gray-400">
+            {tabs.length} {tabs.length === 1 ? "tab" : "tabs"}
+          </span>
+        </div>
 
-            {/* Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteTab(tab.id);
-              }}
-              className="
-          ml-3 text-gray-400 hover:text-red-500 
-          transition opacity-0 group-hover:opacity-100
-        "
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-
-        {/* New Tab Button */}
-        <button
-          onClick={createNewTab}
-          className="
-      flex items-center justify-center w-10 h-10 px-10
-      rounded-t-md bg-[#3a3c42] hover:bg-[#323338] 
-      text-gray-300 border border-gray-600 text-xl font-bold
-      transition select-none cursor-pointer
-    "
-        >
-          +
-        </button>
+        <div className="flex items-center gap-4 text-sm text-gray-400">
+          <span>{getWordCount()} words</span>
+          <span>{getLineCount()} lines</span>
+          <div className="h-4 w-px bg-white/20"></div>
+          <span className="text-xs bg-white/5 px-2 py-1 rounded-lg">
+            Auto-save
+          </span>
+        </div>
       </div>
 
-      {/* --------------------- EDITOR --------------------- */}
-      <div className="">
+   {/* Tabs Bar */}
+<div className="flex items-center px-4 sm:px-6 py-3 bg-gray-800/50 border-b border-white/10 backdrop-blur-sm overflow-x-auto no-scrollbar gap-2">
+  {/* Scroll Buttons for Mobile */}
+  <div className="flex items-center gap-1 sm:hidden">
+    <button
+      onClick={() => {
+        const container = document.querySelector('.tabs-container');
+        container.scrollBy({ left: -200, behavior: 'smooth' });
+      }}
+      className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all"
+    >
+      ‹
+    </button>
+    <button
+      onClick={() => {
+        const container = document.querySelector('.tabs-container');
+        container.scrollBy({ left: 200, behavior: 'smooth' });
+      }}
+      className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all"
+    >
+      ›
+    </button>
+  </div>
+
+  {/* Tabs Container */}
+  <div className="tabs-container flex items-center flex-1 overflow-x-auto no-scrollbar gap-2 min-w-0">
+    {tabs.map((tab) => (
+      <div
+        key={tab.id}
+        onClick={() => switchTab(tab.id)}
+        onDoubleClick={() => {
+          const newTitle = prompt("Rename tab:", tab.title);
+          if (newTitle) renameTab(tab.id, newTitle);
+        }}
+        className={`
+          group flex items-center flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl border transition-all duration-300
+          whitespace-nowrap select-none min-w-[120px] sm:min-w-[140px] max-w-[160px] sm:max-w-[200px] cursor-pointer
+          ${
+            activeTab === tab.id
+              ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg border-emerald-500/30"
+              : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20"
+          }
+        `}
+      >
+        {/* Tab Icon */}
+        <div className="flex-shrink-0 w-3 h-3 rounded-full bg-white/20 mr-2 sm:mr-3"></div>
+        
+        {/* Tab Title */}
+        <span className="truncate flex-1 text-sm sm:text-base">{tab.title}</span>
+
+        {/* Close Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteTab(tab.id);
+          }}
+          className={`
+            ml-2 transition-all duration-200 flex items-center justify-center w-5 h-5 rounded flex-shrink-0
+            ${
+              activeTab === tab.id
+                ? "text-white hover:bg-white/20"
+                : "text-gray-400 hover:text-red-400 hover:bg-white/10"
+            }
+            opacity-0 group-hover:opacity-100
+          `}
+        >
+          ×
+        </button>
+      </div>
+    ))}
+  </div>
+
+  {/* New Tab Button */}
+  <button
+    onClick={createNewTab}
+    className="
+      flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0
+      rounded-xl bg-white/5 border border-white/10 
+      text-gray-300 hover:bg-white/10 hover:text-white
+      transition-all duration-300 hover:scale-105
+      shadow-lg hover:shadow-xl
+    "
+  >
+    <span className="text-lg font-semibold">+</span>
+  </button>
+
+  {/* Tab Count Indicator */}
+  <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-white/10">
+    <span className="text-xs text-gray-400 whitespace-nowrap">
+      {tabs.length} {tabs.length === 1 ? 'tab' : 'tabs'}
+    </span>
+  </div>
+</div>
+      {/* Editor Container */}
+      <div className="flex-1 overflow-hidden">
         <div
           ref={editorRef}
           contentEditable
@@ -365,15 +429,37 @@ export default function Notepad() {
           onPaste={handlePaste}
           onClick={handleEditorClick}
           className="
- px-4 p-8 shadow  h-[calc(100vh-42px)]
-            bg-[#2b2d31] font-mono text-[14px] leading-7
-            overflow-y-scroll
-           
-            bg-[linear-gradient(#3b3d42_1px,transparent_1px)]
-            bg-[length:100%_28px]
+            w-full h-full px-8 py-8
+            bg-gray-800/20 backdrop-blur-sm
+            font-mono text-[15px] leading-8
+            overflow-y-auto scrollbar-thin
             outline-none
+            bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)]
+            bg-[length:100%_32px]
+            text-gray-300
+            selection:bg-emerald-500/30
           "
+          style={{
+            backgroundImage: `
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: "20px 20px, 100% 32px",
+          }}
+          placeholder="Start typing... Paste images with Ctrl+V..."
         ></div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between px-6 py-3 bg-gray-900/50 border-t border-white/10 text-sm text-gray-400">
+        <div className="flex items-center gap-4">
+          <span>⌘ + S to save</span>
+          <span>•</span>
+          <span>Ctrl + V for images</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>Double-click tabs to rename</span>
+        </div>
       </div>
     </div>
   );

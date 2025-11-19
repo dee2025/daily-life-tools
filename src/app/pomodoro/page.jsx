@@ -1,42 +1,39 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 
-import { useEffect, useState, useRef } from "react";
-
-export default function Pomodoro() {
+export default function LargePomodoro() {
   const MODES = {
-    pomodoro: 25 * 60,
+    focus: 25 * 60,
     short: 5 * 60,
     long: 15 * 60,
   };
 
-  const [mode, setMode] = useState("pomodoro");
-  const [seconds, setSeconds] = useState(MODES.pomodoro);
+  const [mode, setMode] = useState("focus");
+  const [seconds, setSeconds] = useState(MODES.focus);
+  const [title, setTitle] = useState("");
   const [isRunning, setIsRunning] = useState(false);
-
   const intervalRef = useRef(null);
 
-  // Load saved state
+  // Load saved data
   useEffect(() => {
-    const saved = localStorage.getItem("pomo-new-ui");
+    const saved = localStorage.getItem("large-pomo");
     if (saved) {
-      const parsed = JSON.parse(saved);
-      setMode(parsed.mode);
-      setSeconds(parsed.seconds);
-      setIsRunning(parsed.isRunning);
+      const p = JSON.parse(saved);
+      setMode(p.mode);
+      setSeconds(p.seconds);
+      setTitle(p.title);
     }
   }, []);
 
   // Save state
   useEffect(() => {
     localStorage.setItem(
-      "pomo-new-ui",
-      JSON.stringify({ mode, seconds, isRunning })
+      "large-pomo",
+      JSON.stringify({ mode, seconds, title })
     );
-  }, [mode, seconds, isRunning]);
+  }, [mode, seconds, title]);
 
-  const maxTime = MODES[mode];
-
-  // Timer Logic
+  // Timer logic
   useEffect(() => {
     if (!isRunning) return;
 
@@ -44,7 +41,7 @@ export default function Pomodoro() {
       setSeconds((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
-          return maxTime;
+          return MODES[mode];
         }
         return prev - 1;
       });
@@ -53,120 +50,185 @@ export default function Pomodoro() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, mode]);
 
-  const formatTime = (sec) => {
-    const m = String(Math.floor(sec / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    return `${m}:${s}`;
+  const changeMode = (m) => {
+    setMode(m);
+    setSeconds(MODES[m]);
+    setIsRunning(false);
   };
 
-  const percentage = ((maxTime - seconds) / maxTime) * 100;
-  const dashOffset = 440 - (440 * percentage) / 100;
+  // Format time
+  const format = (sec) => {
+    const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return { h, m, s };
+  };
+
+  const { h, m, s } = format(seconds);
+
+  const getModeColor = () => {
+    switch(mode) {
+      case "focus": return "from-emerald-500 to-cyan-500";
+      case "short": return "from-amber-500 to-orange-500";
+      case "long": return "from-violet-500 to-purple-500";
+      default: return "from-emerald-500 to-cyan-500";
+    }
+  };
+
+  const getModeLabel = () => {
+    switch(mode) {
+      case "focus": return "Focus Session";
+      case "short": return "Short Break";
+      case "long": return "Long Break";
+      default: return "Focus Session";
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#0d0f11] text-white flex flex-col items-center py-16 px-6">
-
-      {/* Mode Switch */}
-      <div className="flex gap-3 mb-10">
-        {[
-          { key: "pomodoro", label: "Pomodoro" },
-          { key: "short", label: "Short Break" },
-          { key: "long", label: "Long Break" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => {
-              setMode(item.key);
-              setSeconds(MODES[item.key]);
-              setIsRunning(false);
-            }}
-            className={`
-              px-5 py-2 rounded-full border text-sm transition
-              ${
-                mode === item.key
-                  ? "bg-blue-600 border-blue-500 text-white"
-                  : "border-gray-600 text-gray-300 hover:bg-[#1a1c1f]"
-              }
-            `}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Timer Circle */}
-      <div className="relative w-64 h-64 mb-10">
-        <svg className="w-full h-full rotate-[-90deg]">
-          {/* Background Circle */}
-          <circle
-            cx="128"
-            cy="128"
-            r="100"
-            stroke="#24272b"
-            strokeWidth="12"
-            fill="transparent"
-          />
-
-          {/* Progress Circle */}
-          <circle
-            cx="128"
-            cy="128"
-            r="100"
-            stroke="url(#gradientStroke)"
-            strokeWidth="12"
-            fill="transparent"
-            strokeDasharray="440"
-            strokeDashoffset={dashOffset}
-            strokeLinecap="round"
-            className="transition-all duration-300"
-          />
-
-          <defs>
-            <linearGradient id="gradientStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#d66efd" />
-              <stop offset="100%" stopColor="#ff6b8b" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* TIME INSIDE CIRCLE */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-5xl font-semibold">{formatTime(seconds)}</p>
-
-          {isRunning ? (
-            <button
-              onClick={() => setIsRunning(false)}
-              className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 rounded-lg shadow transition"
-            >
-              Stop
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsRunning(true)}
-              className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition"
-            >
-              Start
-            </button>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#0f0f10] to-black text-white flex items-center justify-center p-6">
+      {/* Desktop Frame Container */}
+      <div className="w-full max-w-6xl bg-gray-800/30 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+        
+        {/* Header Bar */}
+        <div className="flex items-center justify-between px-8 py-5 border-b border-white/10 bg-gray-900/80">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-pulse"></div>
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Pomodoro Timer
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getModeColor()} text-white font-medium`}>
+              {getModeLabel()}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Time Adjust Buttons */}
-      <div className="flex items-center gap-6 bg-[#1a1c1f] px-6 py-3 rounded-full border border-[#2a2d31]">
-        <button
-          onClick={() => setSeconds((prev) => Math.max(prev - 300, 0))}
-          className="text-lg px-3 py-1 rounded-lg hover:bg-[#2a2d31] transition"
-        >
-          -5
-        </button>
+        {/* Main Content */}
+        <div className="p-8">
+          {/* Mode Tabs */}
+          <div className="flex justify-center mb-12">
+            <div className="flex bg-gray-900/50 rounded-2xl p-1.5 border border-white/10">
+              {[
+                { key: "focus", label: "Focus", icon: "🎯" },
+                { key: "short", label: "Short", icon: "☕" },
+                { key: "long", label: "Long", icon: "🌿" },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => changeMode(item.key)}
+                  className={`
+                    flex items-center gap-3 px-6 py-3 rounded-xl text-base font-medium transition-all duration-300
+                    ${
+                      mode === item.key
+                        ? `bg-gradient-to-r ${getModeColor()} text-white shadow-lg`
+                        : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                    }
+                  `}
+                >
+                  <span>{item.icon}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <p className="text-gray-300 text-sm">{Math.floor(maxTime / 60)} min</p>
+          {/* Focus Title */}
+          <div className="max-w-2xl mx-auto mb-12">
+            <input
+              type="text"
+              placeholder="What are you focusing on?"
+              className="
+                w-full bg-gray-900/30 border border-gray-700/50 rounded-2xl px-6 py-4
+                outline-none text-gray-300 text-center placeholder-gray-500 text-lg
+                focus:border-gray-600 transition-colors duration-300
+                hover:border-gray-600 backdrop-blur-sm
+              "
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
 
-        <button
-          onClick={() => setSeconds((prev) => prev + 300)}
-          className="text-lg px-3 py-1 rounded-lg hover:bg-[#2a2d31] transition"
-        >
-          +5
-        </button>
+          {/* Giant Timer */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-4 md:gap-8 lg:gap-12 mb-4">
+              <div className="text-center">
+                <div className="text-6xl md:text-8xl lg:text-9xl font-light bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  {h}
+                </div>
+                <div className="text-gray-500 text-sm md:text-base tracking-widest mt-2">HOURS</div>
+              </div>
+              
+              <div className="text-4xl md:text-6xl lg:text-7xl text-gray-600 mb-8">:</div>
+              
+              <div className="text-center">
+                <div className="text-6xl md:text-8xl lg:text-9xl font-light bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  {m}
+                </div>
+                <div className="text-gray-500 text-sm md:text-base tracking-widest mt-2">MINUTES</div>
+              </div>
+              
+              <div className="text-4xl md:text-6xl lg:text-7xl text-gray-600 mb-8">:</div>
+              
+              <div className="text-center">
+                <div className="text-6xl md:text-8xl lg:text-9xl font-light bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  {s}
+                </div>
+                <div className="text-gray-500 text-sm md:text-base tracking-widest mt-2">SECONDS</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Control Button */}
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => setIsRunning(!isRunning)}
+              className={`
+                px-16 py-5 rounded-2xl font-semibold text-xl transition-all duration-300
+                transform hover:scale-105 active:scale-95 shadow-2xl
+                ${
+                  isRunning 
+                    ? "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700" 
+                    : `bg-gradient-to-r ${getModeColor()} hover:shadow-2xl`
+                }
+                flex items-center gap-3
+              `}
+            >
+              {isRunning ? (
+                <>
+                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                  Stop Timer
+                </>
+              ) : (
+                <>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Start Focus
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="max-w-md mx-auto mt-12">
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+              <span>Session Progress</span>
+              <span>{Math.round(((MODES[mode] - seconds) / MODES[mode]) * 100)}%</span>
+            </div>
+            <div className="w-full bg-gray-700/50 rounded-full h-2">
+              <div 
+                className={`h-2 rounded-full bg-gradient-to-r ${getModeColor()} transition-all duration-1000`}
+                style={{ width: `${((MODES[mode] - seconds) / MODES[mode]) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-4 border-t border-white/10 bg-gray-900/50 text-center text-sm text-gray-500">
+          Stay focused • Take breaks • Be productive
+        </div>
       </div>
     </div>
   );
