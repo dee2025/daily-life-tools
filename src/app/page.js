@@ -10,15 +10,31 @@ export default function HomePage() {
       desc: "Modern notepad with tabs, image paste & clean UI.",
       status: "active",
       href: "/notepad",
-      gradient: "from-emerald-500 to-cyan-500"
+      gradient: "from-emerald-500 to-cyan-500",
     },
     {
       icon: "⏱️",
       title: "Pomodoro Timer",
       desc: "Focus better with structured work & break cycles.",
-      status: "active", 
+      status: "active",
       href: "/pomodoro",
-      gradient: "from-violet-500 to-purple-500"
+      gradient: "from-violet-500 to-purple-500",
+    },
+    {
+      icon: "🧩",
+      title: "JSON Formatter",
+      desc: "Format and validate JSON instantly.",
+      status: "active",
+      href: "/json-converter",
+      gradient: "from-gray-600 to-gray-700",
+    },
+    {
+      icon: "🖼️",
+      title: "Image Converter",
+      desc: "Convert images directly in browser.",
+      status: "active",
+      href: "/image-converter",
+      gradient: "from-gray-600 to-gray-700",
     },
 
     // Productivity Bundle (Coming Soon)
@@ -27,63 +43,51 @@ export default function HomePage() {
       title: "Todo App",
       desc: "Organize tasks, priorities & daily goals.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
     {
       icon: "📅",
       title: "Habit Tracker",
       desc: "Track habits daily & build a routine.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
     {
       icon: "🟧",
       title: "Kanban Board",
       desc: "Visual drag-drop workflow management.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
 
     // Developer Bundle (Coming Soon)
-    {
-      icon: "🧩",
-      title: "JSON Formatter",
-      desc: "Format and validate JSON instantly.",
-      status: "coming",
-      gradient: "from-gray-600 to-gray-700"
-    },
+
     {
       icon: "🛠️",
       title: "Code Snippets",
       desc: "Save and organize code snippets locally.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
     {
       icon: "🧪",
       title: "Regex Tester",
       desc: "Test regular expressions with live output.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
     {
       icon: "📦",
       title: "Text Formatter",
       desc: "Convert and transform text efficiently.",
       status: "coming",
-      gradient: "from-gray-600 to-gray-700"
+      gradient: "from-gray-600 to-gray-700",
     },
-    {
-      icon: "🖼️",
-      title: "Image Compressor",
-      desc: "Compress images directly in browser.",
-      status: "coming",
-      gradient: "from-gray-600 to-gray-700"
-    },
+    
   ];
 
-  const activeTools = tools.filter(tool => tool.status === "active");
-  const comingTools = tools.filter(tool => tool.status === "coming");
+  const activeTools = tools.filter((tool) => tool.status === "active");
+  const comingTools = tools.filter((tool) => tool.status === "coming");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#0f0f10] to-black text-gray-200">
@@ -96,14 +100,14 @@ export default function HomePage() {
           </h1>
         </div>
         <div className="flex gap-6 text-sm">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="text-white px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300"
           >
             Home
           </Link>
-          <Link 
-            href="/notepad" 
+          <Link
+            href="/notepad"
             className="text-gray-400 px-4 py-2 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-300"
           >
             Notepad
@@ -117,17 +121,17 @@ export default function HomePage() {
           <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
           Streamlined productivity suite for modern workflows
         </div>
-        
+
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6">
-          Your Personal{' '}
+          Your Personal{" "}
           <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
             Digital Workspace
           </span>
         </h1>
 
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed mb-10">
-          A curated collection of tools designed for creators, developers, and thinkers. 
-          Clean, fast, and focused on what matters.
+          A curated collection of tools designed for creators, developers, and
+          thinkers. Clean, fast, and focused on what matters.
         </p>
 
         <div className="flex gap-4 justify-center flex-wrap">
@@ -179,22 +183,22 @@ export default function HomePage() {
                   hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden
                 "
               >
-                <div className={`absolute inset-0 bg-gradient-to-r ${tool.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r ${tool.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                ></div>
+
                 <div className="flex items-start justify-between mb-4">
                   <div className="text-3xl">{tool.icon}</div>
                   <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full border border-emerald-500/30">
                     Active
                   </span>
                 </div>
-                
+
                 <h3 className="text-xl font-semibold mb-2 group-hover:text-white transition-colors">
                   {tool.title}
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
-                  {tool.desc}
-                </p>
-                
+                <p className="text-gray-400 leading-relaxed">{tool.desc}</p>
+
                 <div className="mt-4 text-sm text-emerald-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Click to open →
                 </div>
@@ -226,7 +230,7 @@ export default function HomePage() {
               "
             >
               <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 opacity-60"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
                   <div className="text-3xl text-gray-500">{tool.icon}</div>
@@ -234,13 +238,11 @@ export default function HomePage() {
                     Coming Soon
                   </span>
                 </div>
-                
+
                 <h3 className="text-xl font-semibold mb-2 text-gray-400">
                   {tool.title}
                 </h3>
-                <p className="text-gray-500 leading-relaxed">
-                  {tool.desc}
-                </p>
+                <p className="text-gray-500 leading-relaxed">{tool.desc}</p>
               </div>
             </div>
           ))}
