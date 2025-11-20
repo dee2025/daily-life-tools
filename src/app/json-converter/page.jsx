@@ -238,16 +238,8 @@ function tryGetRootKeys(text) {
 }
 
 export default function JSONTool() {
-  const [text, setText] = useState(() => {
-    try {
-      const hash = location?.hash?.slice(1);
-      if (hash) {
-        const dec = decodeFromHash(hash);
-        if (dec) return dec;
-      }
-    } catch {}
-    return localStorage.getItem("json-tool-last") || DEFAULT_SAMPLE;
-  });
+  const [text, setText] = useState(DEFAULT_SAMPLE);
+
   const [textB, setTextB] = useState("");
   const [formatted, setFormatted] = useState("");
   const [mode, setMode] = useState("split");
@@ -290,6 +282,7 @@ export default function JSONTool() {
   }, [text, autoFormat]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
       localStorage.setItem("json-tool-last", text);
     } catch {}
@@ -416,12 +409,17 @@ export default function JSONTool() {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     try {
-      const hash = location.hash?.slice(1);
+      const hash = window.location.hash?.slice(1);
       if (hash) {
         const dec = decodeFromHash(hash);
-        if (dec) setText(dec);
+        if (dec) return setText(dec);
       }
+
+      const saved = localStorage.getItem("json-tool-last");
+      if (saved) setText(saved);
     } catch {}
   }, []);
 
@@ -467,6 +465,14 @@ export default function JSONTool() {
       description: "Convert between JSON and XML",
     },
   ];
+
+  function safeJsonParse(str) {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return {};
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#0f0f10] to-black text-white ">
@@ -653,7 +659,7 @@ export default function JSONTool() {
                 <div className="h-96 bg-gray-900/40 border border-gray-600 rounded-lg p-4 overflow-auto">
                   {formatted ? (
                     <JsonTree
-                      data={JSON.parse(text)}
+                      data={safeJsonParse(text)}
                       collapsedPaths={collapsedPaths}
                       toggleCollapse={toggleCollapse}
                     />
