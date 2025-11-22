@@ -36,6 +36,14 @@ export default function HomePage() {
       href: "/image-converter",
       gradient: "from-gray-600 to-gray-700",
     },
+    {
+      icon: "📅",
+      title: "Habit Tracker",
+      desc: "Track habits daily & build a routine.",
+      status: "active",
+      href: "/habit-tracker",
+      gradient: "from-gray-600 to-gray-700",
+    },
 
     // Productivity Bundle (Coming Soon)
     {
@@ -45,13 +53,7 @@ export default function HomePage() {
       status: "coming",
       gradient: "from-gray-600 to-gray-700",
     },
-    {
-      icon: "📅",
-      title: "Habit Tracker",
-      desc: "Track habits daily & build a routine.",
-      status: "coming",
-      gradient: "from-gray-600 to-gray-700",
-    },
+
     {
       icon: "🟧",
       title: "Kanban Board",
@@ -83,7 +85,6 @@ export default function HomePage() {
       status: "coming",
       gradient: "from-gray-600 to-gray-700",
     },
-    
   ];
 
   const activeTools = tools.filter((tool) => tool.status === "active");
@@ -148,7 +149,7 @@ export default function HomePage() {
             Start with Notepad
           </Link>
           <Link
-            href="/pomodoro"
+            href="/habit-tracker"
             className="
               px-8 py-4 font-semibold rounded-2xl
               bg-white/5 border border-white/10
@@ -157,13 +158,13 @@ export default function HomePage() {
               transition-all duration-300
             "
           >
-            Try Pomodoro
+            Try Habit Tracker
           </Link>
         </div>
       </section>
 
       {/* ACTIVE TOOLS */}
-      <section className="px-6 md:px-16 pb-16 max-w-6xl mx-auto">
+      <section className="px-6 md:px-16 pb-16 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
@@ -172,7 +173,7 @@ export default function HomePage() {
           <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/20 to-transparent"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {activeTools.map((tool) => (
             <Link key={tool.title} href={tool.href}>
               <div
@@ -209,7 +210,7 @@ export default function HomePage() {
       </section>
 
       {/* COMING SOON TOOLS */}
-      <section className="px-6 md:px-16 pb-20 max-w-6xl mx-auto">
+      <section className="px-6 md:px-16 pb-20 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
