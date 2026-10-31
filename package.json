@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy.ps1"
   },
   "dependencies": {
     "@tiptap/extension-image": "^3.11.0",
@@ -17,9 +18,9 @@
     "@tiptap/starter-kit": "^3.11.0",
     "@vercel/analytics": "^1.5.0",
     "framer-motion": "^12.23.24",
-    "jspdf": "^3.0.3",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.554.0",
-    "next": "16.0.3",
+    "next": "^16.4.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "recharts": "^3.4.1"

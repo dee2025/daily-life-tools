@@ -96,9 +96,9 @@ export default function HomePage() {
       <nav className="flex items-center justify-between px-6 py-5 border-b border-white/10 backdrop-blur-xl sticky top-0 z-50 bg-gray-900/80">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-pulse"></div>
-          <h1 className="text-xl font-semibold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <span className="text-xl font-semibold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             Daily Life Tools
-          </h1>
+          </span>
         </div>
         <div className="flex gap-6 text-sm">
           <Link
@@ -120,19 +120,19 @@ export default function HomePage() {
       <section className="text-center px-6 md:px-16 pt-20 pb-16 max-w-7xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-400 mb-8">
           <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-          Streamlined productivity suite for modern workflows
+          Free, private tools that work in your browser
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6">
-          Your Personal{" "}
+          Free Online{" "}
           <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Digital Workspace
+            Productivity Tools
           </span>
         </h1>
 
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed mb-10">
-          A curated collection of tools designed for creators, developers, and
-          thinkers. Clean, fast, and focused on what matters.
+          Use a notepad, Pomodoro timer, JSON formatter, image converter, and
+          habit tracker without creating an account. Your work stays in your browser.
         </p>
 
         <div className="flex gap-4 justify-center flex-wrap">
@@ -247,6 +247,26 @@ export default function HomePage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section
+        className="px-6 md:px-16 pb-20 max-w-7xl mx-auto"
+        aria-labelledby="why-daily-life-tools"
+      >
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+          <h2
+            id="why-daily-life-tools"
+            className="text-2xl md:text-3xl font-semibold mb-4"
+          >
+            Why use Daily Life Tools?
+          </h2>
+          <p className="text-gray-400 leading-relaxed max-w-4xl">
+            Every tool is free, fast, and designed for everyday work. Notes,
+            habits, timers, JSON, and image conversions are handled locally
+            whenever the tool supports it, helping you stay productive without
+            unnecessary signups or uploads.
+          </p>
         </div>
       </section>
 

@@ -1,80 +1,50 @@
 import HomeButton from "@/components/HomeButton";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
+import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const GA_MEASUREMENT_ID = "G-TCJN8HPNWT";
 
 export const metadata = {
-  title: "Daily Life Tools – Notepad, Productivity Apps & Developer Utilities",
-  description:
-    "A privacy-first collection of tools including Notepad, Pomodoro Timer, Todo Manager, Habit Tracker, JSON Formatter, Regex Tester and more — no login, no signup, no cloud. Your data stays in your browser only.",
-
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Daily Life Tools — Free Online Productivity Tools",
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
   keywords: [
-    "notepad",
-    "online notepad",
-    "pomodoro timer",
-    "todo app",
-    "habit tracker",
-    "kanban board",
-    "json formatter",
-    "regex tester",
-    "text formatter",
-    "image compressor",
-    "developer tools",
-    "productivity tools",
-    "local tools",
-    "privacy based tools",
-    "daily life tools",
-    "no login tools",
-    "browser based tools",
-    "free online tools",
+    "online notepad", "pomodoro timer", "habit tracker", "json formatter",
+    "image converter", "developer tools", "productivity tools",
+    "privacy-first tools", "free online tools",
   ],
-
   authors: [{ name: "Deepak Singh" }],
   creator: "Deepak Singh",
   publisher: "Deepak Singh",
-
-  metadataBase: new URL("https://daily-life-tools.vercel.app"),
-
-  icons: {
-    icon: "/favicon.ico",
-  },
-
+  icons: { icon: "/favicon.ico" },
   openGraph: {
-    title: "Daily Life Tools – Privacy First Productivity & Developer Toolkit",
-    description:
-      "Premium tools like Notepad, Pomodoro Timer, JSON Formatter, Todo App, and more. 100% offline. No account required. Your data stays in your browser.",
-    url: "https://daily-life-tools.vercel.app",
-    siteName: "Daily Life Tools",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Daily Life Tools - Premium Productivity Toolset",
-      },
-    ],
-    locale: "en_US",
+    title: "Daily Life Tools — Free Private Browser Tools",
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    images: [{
+      url: "/og-image.png",
+      width: 1200,
+      height: 630,
+      alt: "Daily Life Tools — private productivity and developer tools",
+    }],
+    locale: "en_IN",
     type: "website",
   },
-
   twitter: {
     card: "summary_large_image",
-    title: "Daily Life Tools – Premium Offline Productivity Tools",
-    description:
-      "Use Notepad, Pomodoro Timer, JSON Formatter & more with total privacy. No signup, no data collection.",
+    title: "Daily Life Tools — Free Private Browser Tools",
+    description: DEFAULT_DESCRIPTION,
     images: ["/og-image.png"],
   },
-
   robots: {
     index: true,
     follow: true,
@@ -86,21 +56,47 @@ export const metadata = {
       "max-video-preview": -1,
     },
   },
+  alternates: { canonical: SITE_URL },
+  applicationName: SITE_NAME,
+  category: "productivity",
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
+};
 
-  alternates: {
-    canonical: "https://daily-life-tools.vercel.app",
-  },
+const websiteStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  alternateName: "DailyLifeTools",
+  url: `${SITE_URL}/`,
+  description: DEFAULT_DESCRIPTION,
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en-IN">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteStructuredData).replace(/</g, "\\u003c"),
+          }}
+        />
         <Analytics />
         {children}
-
         <HomeButton />
       </body>
     </html>
