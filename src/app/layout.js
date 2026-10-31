@@ -24,7 +24,6 @@ export const metadata = {
   authors: [{ name: "Deepak Singh" }],
   creator: "Deepak Singh",
   publisher: "Deepak Singh",
-  icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "Daily Life Tools — Free Private Browser Tools",
     description: DEFAULT_DESCRIPTION,
