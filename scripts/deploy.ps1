@@ -5,7 +5,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$ExpectedRemote = "https://github.com/dee2025/daily-life-tools.git"
+$ExpectedLocalRemote = "git@github.com:dee2025/daily-life-tools.git"
+$ExpectedProductionRemote = "https://github.com/dee2025/daily-life-tools.git"
 $Server = "root@213.199.57.13"
 $AppDirectory = "/home/dailylifetools/htdocs/www.dailylifetools.in"
 $Service = "dailylifetools.service"
@@ -39,9 +40,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "Unable to read the origin remote."
 }
 
-if ($origin -ne $ExpectedRemote.TrimEnd("/")) {
-    throw "Refusing to deploy an unexpected repository. Expected $ExpectedRemote but found $origin"
+if ($origin -ne $ExpectedLocalRemote.TrimEnd("/")) {
+    throw "Refusing to deploy an unexpected repository. Expected $ExpectedLocalRemote but found $origin"
 }
+
+Write-Host "Checking GitHub push access..." -ForegroundColor Cyan
+Invoke-CheckedCommand -Command git -CommandArguments @("push", "--dry-run", "origin", "HEAD:main")
 
 Write-Host "Building the local application..." -ForegroundColor Cyan
 Invoke-CheckedCommand -Command npm -CommandArguments @("run", "build")
@@ -129,7 +133,7 @@ echo "Production is live at commit $actual_commit"
 '@
 
 Write-Host "Deploying commit $localCommit to production..." -ForegroundColor Cyan
-$remoteScript | & ssh $Server bash -se -- $AppDirectory $Service $localCommit $ExpectedRemote
+$remoteScript | & ssh $Server bash -se -- $AppDirectory $Service $localCommit $ExpectedProductionRemote
 if ($LASTEXITCODE -ne 0) {
     throw "Production deployment failed with exit code $LASTEXITCODE."
 }

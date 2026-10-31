@@ -10,4 +10,4 @@ npm run deploy
 
 It builds the project locally, commits the current changes, rebases and pushes the `main` branch to GitHub, then connects to `root@213.199.57.13`, pulls the same commit, installs production dependencies, builds the application, and restarts `dailylifetools.service`.
 
-GitHub authentication and SSH access must already be configured on this computer. Use an SSH key or enter the server password when OpenSSH asks for it. The server password is intentionally not stored in this repository or command.
+This repository uses the personal GitHub SSH key for the `dee2025` account, without changing authentication for other repositories or accounts. SSH access to the production server must also be configured; otherwise, OpenSSH will securely ask for the server password. The password is intentionally not stored in this repository or command.
