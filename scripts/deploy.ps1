@@ -94,38 +94,101 @@ service="$2"
 expected_commit="$3"
 expected_remote="$4"
 
-if [ ! -d "$app_directory/.git" ]; then
-  echo "Production directory is not a Git checkout: $app_directory" >&2
-  echo "Clone $expected_remote into that directory once, then rerun the deploy command." >&2
+if [ ! -d "$app_directory" ]; then
+  echo "Production directory does not exist: $app_directory" >&2
   exit 1
+fi
+
+app_owner="$(stat -c '%U' "$app_directory")"
+app_group="$(stat -c '%G' "$app_directory")"
+
+run_as_app() {
+  if [ "$app_owner" = "root" ]; then
+    "$@"
+  else
+    runuser -u "$app_owner" -- "$@"
+  fi
+}
+
+bootstrap_production() {
+  release_directory="$(mktemp -d "${app_directory}.release.XXXXXX")"
+  backup_directory="${app_directory}.backup.$(date -u +%Y%m%dT%H%M%SZ)"
+
+  echo "Creating the initial production Git checkout..."
+  git clone --branch main --single-branch "$expected_remote" "$release_directory"
+
+  actual_commit="$(git -C "$release_directory" rev-parse HEAD)"
+  if [ "$actual_commit" != "$expected_commit" ]; then
+    echo "Cloned commit $actual_commit does not match pushed commit $expected_commit." >&2
+    exit 1
+  fi
+
+  for env_name in .env .env.local .env.production .env.production.local; do
+    if [ -f "$app_directory/$env_name" ]; then
+      cp -p "$app_directory/$env_name" "$release_directory/$env_name"
+    fi
+  done
+
+  chown -R "$app_owner:$app_group" "$release_directory"
+  run_as_app npm --prefix "$release_directory" ci
+  run_as_app npm --prefix "$release_directory" run build
+
+  systemctl stop "$service"
+  mv "$app_directory" "$backup_directory"
+
+  if ! mv "$release_directory" "$app_directory"; then
+    mv "$backup_directory" "$app_directory"
+    systemctl start "$service"
+    echo "Unable to switch the new release into place; the previous production directory was restored." >&2
+    exit 1
+  fi
+
+  if ! systemctl start "$service" || ! systemctl is-active --quiet "$service"; then
+    failed_directory="${app_directory}.failed.$(date -u +%Y%m%dT%H%M%SZ)"
+    systemctl stop "$service" || true
+    mv "$app_directory" "$failed_directory"
+    mv "$backup_directory" "$app_directory"
+    systemctl start "$service"
+    echo "The new release failed to start; the previous production directory was restored." >&2
+    echo "Failed release retained at: $failed_directory" >&2
+    exit 1
+  fi
+
+  echo "Initial Git deployment completed. Previous production files retained at: $backup_directory"
+  echo "Production is live at commit $actual_commit"
+}
+
+if [ ! -d "$app_directory/.git" ]; then
+  bootstrap_production
+  exit 0
 fi
 
 cd "$app_directory"
 
-remote_url="$(git remote get-url origin)"
+remote_url="$(run_as_app git remote get-url origin)"
 if [ "${remote_url%/}" != "${expected_remote%/}" ]; then
   echo "Unexpected production Git remote: $remote_url" >&2
   exit 1
 fi
 
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(run_as_app git status --porcelain)" ]; then
   echo "Production has uncommitted changes. Refusing to overwrite them." >&2
-  git status --short >&2
+  run_as_app git status --short >&2
   exit 1
 fi
 
-git fetch origin main
-git checkout main
-git pull --ff-only origin main
+run_as_app git fetch origin main
+run_as_app git checkout main
+run_as_app git pull --ff-only origin main
 
-actual_commit="$(git rev-parse HEAD)"
+actual_commit="$(run_as_app git rev-parse HEAD)"
 if [ "$actual_commit" != "$expected_commit" ]; then
   echo "Production commit $actual_commit does not match pushed commit $expected_commit." >&2
   exit 1
 fi
 
-npm ci
-npm run build
+run_as_app npm ci
+run_as_app npm run build
 systemctl restart "$service"
 systemctl is-active --quiet "$service"
 
